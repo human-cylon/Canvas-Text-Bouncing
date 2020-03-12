@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>game with style</title>
+	<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%; /* this is necessary for vertical alignment to work properly */
+}
+
+body {
+    margin: 0;
+} /* this is necessary for vertical alignment to work properly */
+	
+#flex-container {
+    padding: 0; /* this is necessary for vertical alignment to work properly */
+    margin: 0; /* this is necessary for vertical alignment to work properly */
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    height: 100%; /* this is necessary for vertical alignment to work properly */
+}
+
+#shadower {
+    box-shadow: 5px 5px 5px 5px grey;
+}
+
+canvas {
+    border: 1px solid #FFA43B;
+    background-color: skyblue;
+    height:100%;
+    
+}		
+		
+	</style>
+</head>
+<body onload="startGame()">
+
+<!--
+<div class="first" style="display:none">
+<span class="engword"></span>
+<span class="rusword"></span>
+</div> 
+-->
+
+<div class="first" style="display:none">
+<span class="engword">again</span>
+<span class="rusword">опять, снова</span>
+</div> 
+
+<div class="first" style="display:none">
+<span class="engword">never</span>
+<span class="rusword">никогда</span>
+</div> 
+
+<div class="first" style="display:none">
+<span class="engword">after</span>
+<span class="rusword">после</span>
+</div> 
+
+<div class="first" style="display:none">
+<span class="engword">later</span>
+<span class="rusword">позже</span>
+</div> 
+
+<div class="first" style="display:none">
+<span class="engword">before</span>
+<span class="rusword">перед, до</span>
+</div> 
+
+<div id="flex-container">
+
+<div id="shadower">
+<div>Поймайте слово: <span id="task"> </span><input type="button" onclick="showNext()" value="Next"></div>
+
+<canvas id="area" width="500px" height="500px"></canvas>
+
+<div id="answer"></div>
+<div id="test"></div>
+</div>
+</div>
+
+<script>
+var text;
+var tasks = [];
+var taskNumber;
+
+
+var myGameArea = {
+    canvas : document.getElementById("area"),
+    ctx : document.getElementById("area").getContext("2d"),
+    start : function() {   
+        this.context = this.ctx;
+        this.animation = window.requestAnimationFrame(updateGameArea);
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);},
+    stop : function() {
+        window.cancelAnimationFrame(this.animation);}
+}    
+
+
+
+function startGame() {
+myGameArea.ctx.font = "30px sans serif";
+var oneWord = document.getElementsByClassName("engword")[0].innerHTML;
+var twoWord = document.getElementsByClassName("engword")[1].innerHTML;
+var threeWord = document.getElementsByClassName("engword")[2].innerHTML;
+var fourWord = document.getElementsByClassName("engword")[3].innerHTML;
+var fiveWord = document.getElementsByClassName("engword")[4].innerHTML;
+
+one = new component(Math.floor(Math.random() * (501 - myGameArea.ctx.measureText(oneWord).width)), Math.floor(Math.random() * (501 - 30)), oneWord, 1, 1);
+two = new component(Math.floor(Math.random() * (501 - myGameArea.ctx.measureText(twoWord).width)), Math.floor(Math.random() * (501 - 30)), twoWord, 1, 1);
+three = new component(Math.floor(Math.random() * (501 - myGameArea.ctx.measureText(threeWord).width)), Math.floor(Math.random() * (501 - 30)), threeWord, 1, 1);
+four = new component(Math.floor(Math.random() * (501 - myGameArea.ctx.measureText(fourWord).width)), Math.floor(Math.random() * (501 - 30)), fourWord, 1, 1);
+five = new component(Math.floor(Math.random() * (501 - myGameArea.ctx.measureText(fiveWord).width)), Math.floor(Math.random() * (501 - 30)), fiveWord, -1, -1);
+
+getRandomTask();
+}
+
+
+function component(x, y, word, dx, dy) {
+   this.word = word;
+   this.y = y;
+   this.x = x;
+   this.dx = dx;
+   this.dy = dy;
+    
+    this.update = function() {
+    //draw the word
+    myGameArea.ctx.textBaseline = 'top';
+    myGameArea.ctx.strokeStyle = 'lightpink';
+    myGameArea.ctx.lineWidth = 3;
+    myGameArea.ctx.fillStyle = 'purple';
+    myGameArea.ctx.strokeText(this.word, this.x, this.y);
+    myGameArea.ctx.fillText(this.word, this.x, this.y);
+    }
+    
+    this.crash = function() {
+    //this code block checks if random starting coordinates have created overlay
+    if (this.x > one.x && this.x < one.x + myGameArea.ctx.measureText(one.word).width && this.y > one.y && this.y < one.y + myGameArea.ctx.measureText(one.word).width && one.x + myGameArea.ctx.measureText(one.word).width - this.x > 1 && one.y + 30 - this.y > 1) 
+    {
+    if (this.y - 30 - (this.y - one.y) > 1)
+    {this.y = this.y - 30 - (this.y - one.y)}
+    else {this.y = this.y + (one.y + 30 - this.y);}
+    if (one.x + myGameArea.ctx.measureText(one.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = one.x + myGameArea.ctx.measureText(one.word).width}
+    else {this.x = one.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x == one.x && this.y == one.y && this.word != one.word)
+    {
+    if (this.y - 30 - (this.y - one.y) > 1)
+    {this.y = this.y - 30 - (this.y - one.y)}
+    else {this.y = this.y + (one.y + 30 - this.y);}
+    if (one.x + myGameArea.ctx.measureText(one.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = one.x + myGameArea.ctx.measureText(one.word).width}
+    else {this.x = one.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x < one.x && this.x + myGameArea.ctx.measureText(this.word).width > one.x && this.y > one.y && this.y < one.y + 30 && this.x + myGameArea.ctx.measureText(this.word).width - one.x > 1 && one.y + 30 - this.y > 1)
+    {
+    if (this.y - 30 - (this.y - one.y) > 1)
+    {this.y = this.y - 30 - (this.y - one.y)}
+    else {this.y = this.y + (one.y + 30 - this.y);}
+    if (one.x + myGameArea.ctx.measureText(one.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = one.x + myGameArea.ctx.measureText(one.word).width}
+    else {this.x = one.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    
+    if (this.x > two.x && this.x < two.x + myGameArea.ctx.measureText(two.word).width && this.y > two.y && this.y < two.y + myGameArea.ctx.measureText(two.word).width && two.x + myGameArea.ctx.measureText(two.word).width - this.x > 1 && two.y + 30 - this.y > 1) 
+    {
+    if (this.y - 30 - (this.y - two.y) > 1)
+    {this.y = this.y - 30 - (this.y - two.y)}
+    else {this.y = this.y + (two.y + 30 - this.y);}
+    if (two.x + myGameArea.ctx.measureText(two.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = two.x + myGameArea.ctx.measureText(two.word).width}
+    else {this.x = two.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x == two.x && this.y == two.y && this.word != two.word)
+    {
+    if (this.y - 30 - (this.y - two.y) > 1)
+    {this.y = this.y - 30 - (this.y - two.y)}
+    else {this.y = this.y + (two.y + 30 - this.y);}
+    if (two.x + myGameArea.ctx.measureText(two.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = two.x + myGameArea.ctx.measureText(two.word).width}
+    else {this.x = two.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x < two.x && this.x + myGameArea.ctx.measureText(this.word).width > two.x && this.y > two.y && this.y < two.y + 30 && this.x + myGameArea.ctx.measureText(this.word).width - two.x > 1 && two.y + 30 - this.y > 1)
+    {
+    if (this.y - 30 - (this.y - two.y) > 1)
+    {this.y = this.y - 30 - (this.y - two.y)}
+    else {this.y = this.y + (two.y + 30 - this.y);}
+    if (two.x + myGameArea.ctx.measureText(two.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = two.x + myGameArea.ctx.measureText(two.word).width}
+    else {this.x = two.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+
+    if (this.x > three.x && this.x < three.x + myGameArea.ctx.measureText(three.word).width && this.y > three.y && this.y < three.y + myGameArea.ctx.measureText(three.word).width && three.x + myGameArea.ctx.measureText(three.word).width - this.x > 1 && three.y + 30 - this.y > 1) 
+    {
+    if (this.y - 30 - (this.y - three.y) > 1)
+    {this.y = this.y - 30 - (this.y - three.y)}
+    else {this.y = this.y + (three.y + 30 - this.y);}
+    if (three.x + myGameArea.ctx.measureText(three.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = three.x + myGameArea.ctx.measureText(three.word).width}
+    else {this.x = three.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x == three.x && this.y == three.y && this.word != three.word)
+    {
+    if (this.y - 30 - (this.y - three.y) > 1)
+    {this.y = this.y - 30 - (this.y - three.y)}
+    else {this.y = this.y + (three.y + 30 - this.y);}
+    if (three.x + myGameArea.ctx.measureText(three.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = three.x + myGameArea.ctx.measureText(three.word).width}
+    else {this.x = three.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x < three.x && this.x + myGameArea.ctx.measureText(this.word).width > three.x && this.y > three.y && this.y < three.y + 30  && this.x + myGameArea.ctx.measureText(this.word).width - three.x > 1 && three.y + 30 - this.y > 1)
+    {
+    if (this.y - 30 - (this.y - three.y) > 1)
+    {this.y = this.y - 30 - (this.y - three.y)}
+    else {this.y = this.y + (three.y + 30 - this.y);}
+    if (three.x + myGameArea.ctx.measureText(three.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = three.x + myGameArea.ctx.measureText(three.word).width}
+    else {this.x = three.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+
+    if (this.x > four.x && this.x < four.x + myGameArea.ctx.measureText(four.word).width && this.y > four.y && this.y < four.y + myGameArea.ctx.measureText(four.word).width && four.x + myGameArea.ctx.measureText(four.word).width - this.x > 1 && four.y + 30 - this.y > 1) 
+    {
+    if (this.y - 30 - (this.y - four.y) > 1)
+    {this.y = this.y - 30 - (this.y - four.y)}
+    else {this.y = this.y + (four.y + 30 - this.y);}
+    if (four.x + myGameArea.ctx.measureText(four.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = four.x + myGameArea.ctx.measureText(four.word).width}
+    else {this.x = four.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x == four.x && this.y == four.y && this.word != four.word)
+    {
+    if (this.y - 30 - (this.y - four.y) > 1)
+    {this.y = this.y - 30 - (this.y - four.y)}
+    else {this.y = this.y + (four.y + 30 - this.y);}
+    if (four.x + myGameArea.ctx.measureText(four.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = four.x + myGameArea.ctx.measureText(four.word).width}
+    else {this.x = four.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x < four.x && this.x + myGameArea.ctx.measureText(this.word).width > four.x && this.y > four.y && this.y < four.y + 30 && this.x + myGameArea.ctx.measureText(this.word).width - four.x > 1 && four.y + 30 - this.y > 1)
+    {
+    if (this.y - 30 - (this.y - four.y) > 1)
+    {this.y = this.y - 30 - (this.y - four.y)}
+    else {this.y = this.y + (four.y + 30 - this.y);}
+    if (four.x + myGameArea.ctx.measureText(four.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = four.x + myGameArea.ctx.measureText(four.word).width}
+    else {this.x = four.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+
+    if (this.x > five.x && this.x < five.x + myGameArea.ctx.measureText(five.word).width && this.y > five.y && this.y < five.y + myGameArea.ctx.measureText(five.word).width && five.x + myGameArea.ctx.measureText(five.word).width - this.x > 1 && five.y + 30 - this.y > 1) 
+    {
+    if (this.y - 30 - (this.y - five.y) > 1)
+    {this.y = this.y - 30 - (this.y - five.y)}
+    else {this.y = this.y + (five.y + 30 - this.y);}
+    if (five.x + myGameArea.ctx.measureText(five.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = five.x + myGameArea.ctx.measureText(five.word).width}
+    else {this.x = five.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x == five.x && this.y == five.y && this.word != five.word)
+    {
+    if (this.y - 30 - (this.y - five.y) > 1)
+    {this.y = this.y - 30 - (this.y - five.y)}
+    else {this.y = this.y + (five.y + 30 - this.y);}
+    if (five.x + myGameArea.ctx.measureText(five.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = five.x + myGameArea.ctx.measureText(five.word).width}
+    else {this.x = five.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    if (this.x < five.x && this.x + myGameArea.ctx.measureText(this.word).width > five.x && this.y > five.y && this.y < five.y + 30 && this.x + myGameArea.ctx.measureText(this.word).width - five.x > 1 && five.y + 30 - this.y > 1)
+    {
+    if (this.y - 30 - (this.y - five.y) > 1)
+    {this.y = this.y - 30 - (this.y - five.y)}
+    else {this.y = this.y + (five.y + 30 - this.y);}
+    if (five.x + myGameArea.ctx.measureText(five.word).width + myGameArea.ctx.measureText(this.word).width < myGameArea.canvas.width - 1) {this.x = five.x + myGameArea.ctx.measureText(five.word).width}
+    else {this.x = five.x - myGameArea.ctx.measureText(this.word).width;}
+    }
+    
+    //don't touch anything after this line
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= one.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= one.x + myGameArea.ctx.measureText(one.word).width) && (this.y + this.dy + 30 >= one.y) && (this.y + this.dy + 30 <= one.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; one.dx = -one.dx; one.dy = -one.dy;}
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= one.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= one.x + myGameArea.ctx.measureText(one.word).width) && (this.y + this.dy >= one.y) && (this.y + this.dy <= one.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; one.dx = -one.dx; one.dy = -one.dy;}
+    if ((this.x + this.dx >= one.x) && (this.x + this.dx <= one.x + myGameArea.ctx.measureText(one.word).width) && (this.y + this.dy + 30 >= one.y) && (this.y + this.dy + 30 <= one.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; one.dx = -one.dx; one.dy = -one.dy;}
+    if ((this.x + this.dx >= one.x) && (this.x + this.dx <= one.x + myGameArea.ctx.measureText(one.word).width) && (this.y + this.dy >= one.y) && (this.y + this.dy <= one.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; one.dx = -one.dx; one.dy = -one.dy;}
+
+    
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= two.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= two.x + myGameArea.ctx.measureText(two.word).width) && (this.y + this.dy + 30 >= two.y) && (this.y + this.dy + 30 <= two.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; two.dx = -two.dx; two.dy = -two.dy;}
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= two.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= two.x + myGameArea.ctx.measureText(two.word).width) && (this.y + this.dy >= two.y) && (this.y + this.dy <= two.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; two.dx = -two.dx; two.dy = -two.dy;}
+    if ((this.x + this.dx >= two.x) && (this.x + this.dx <= two.x + myGameArea.ctx.measureText(two.word).width) && (this.y + this.dy + 30 >= two.y) && (this.y + this.dy + 30 <= two.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; two.dx = -two.dx; two.dy = -two.dy;}
+    if ((this.x + this.dx >= two.x) && (this.x + this.dx <= two.x + myGameArea.ctx.measureText(two.word).width) && (this.y + this.dy >= two.y) && (this.y + this.dy <= two.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; two.dx = -two.dx; two.dy = -two.dy;}
+
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= three.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= three.x + myGameArea.ctx.measureText(three.word).width) && (this.y + this.dy + 30 >= three.y) && (this.y + this.dy + 30 <= three.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; three.dx = -three.dx; three.dy = -three.dy;}
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= three.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= three.x + myGameArea.ctx.measureText(three.word).width) && (this.y + this.dy >= three.y) && (this.y + this.dy <= three.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; three.dx = -three.dx; three.dy = -three.dy;}
+    if ((this.x + this.dx >= three.x) && (this.x + this.dx <= three.x + myGameArea.ctx.measureText(three.word).width) && (this.y + this.dy + 30 >= three.y) && (this.y + this.dy + 30 <= three.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; three.dx = -three.dx; three.dy = -three.dy;}
+    if ((this.x + this.dx >= three.x) && (this.x + this.dx <= three.x + myGameArea.ctx.measureText(three.word).width) && (this.y + this.dy >= three.y) && (this.y + this.dy <= three.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; three.dx = -three.dx; three.dy = -three.dy;}
+    
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= four.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= four.x + myGameArea.ctx.measureText(four.word).width) && (this.y + this.dy + 30 >= four.y) && (this.y + this.dy + 30 <= four.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; four.dx = -four.dx; four.dy = -four.dy;}
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= four.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= four.x + myGameArea.ctx.measureText(four.word).width) && (this.y + this.dy >= four.y) && (this.y + this.dy <= four.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; four.dx = -four.dx; four.dy = -four.dy;}
+    if ((this.x + this.dx >= four.x) && (this.x + this.dx <= four.x + myGameArea.ctx.measureText(four.word).width) && (this.y + this.dy + 30 >= four.y) && (this.y + this.dy + 30 <= four.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; four.dx = -four.dx; four.dy = -four.dy;}
+    if ((this.x + this.dx >= four.x) && (this.x + this.dx <= four.x + myGameArea.ctx.measureText(four.word).width) && (this.y + this.dy >= four.y) && (this.y + this.dy <= four.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; four.dx = -four.dx; four.dy = -four.dy;}
+        
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= five.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= five.x + myGameArea.ctx.measureText(five.word).width) && (this.y + this.dy + 30 >= five.y) && (this.y + this.dy + 30 <= five.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; five.dx = -five.dx; five.dy = -five.dy;}
+    if ((this.x + this.dx + myGameArea.ctx.measureText(this.word).width >= five.x) && (this.x + this.dx + myGameArea.ctx.measureText(this.word).width <= five.x + myGameArea.ctx.measureText(five.word).width) && (this.y + this.dy >= five.y) && (this.y + this.dy <= five.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; five.dx = -five.dx; five.dy = -five.dy;}
+    if ((this.x + this.dx >= five.x) && (this.x + this.dx <= five.x + myGameArea.ctx.measureText(five.word).width) && (this.y + this.dy + 30 >= five.y) && (this.y + this.dy + 30 <= five.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; five.dx = -five.dx; five.dy = -five.dy;}
+    if ((this.x + this.dx >= five.x) && (this.x + this.dx <= five.x + myGameArea.ctx.measureText(five.word).width) && (this.y + this.dy >= five.y) && (this.y + this.dy <= five.y + 30)) 
+        {this.dx = -this.dx; this.dy = -this.dy; five.dx = -five.dx; five.dy = -five.dy;} 
+    }
+    
+    this.move = function() {
+    ctx = myGameArea.context;
+    if ((this.x + this.dx > myGameArea.canvas.width - myGameArea.ctx.measureText(this.word).width) || this.x + this.dx < 0) {this.dx = -this.dx;}
+    if ((this.y + this.dy > myGameArea.canvas.height - 30) || this.y + this.dy < 0) {this.dy = -this.dy;}                                       //30 is font size
+    this.x += this.dx;
+    this.y += this.dy;
+    }
+    
+    this.checkAnswer = function(mousePos) {
+    if (mousePos.h >= this.x && mousePos.h <= this.x + myGameArea.ctx.measureText(this.word).width && mousePos.v >= this.y && mousePos.v <= this.y + 30 && this.word == text) 
+    {myGameArea.stop(); document.getElementById("answer").innerHTML = "correct!"; this.colorize();}
+    }
+    
+    this.colorize = function() {
+    myGameArea.ctx.fillStyle = "orange";
+    ctx.fillText(this.word, this.x, this.y);
+    }
+    
+    this.freeze = function() {
+    addEventListener('mouseenter', function() {this.dx = 0; this.dy = 0;})
+    }
+}
+
+function updateGameArea() {
+    myGameArea.clear();
+    one.crash();
+    one.move();
+    one.update();
+    
+    two.crash();
+    two.move();
+    two.update();
+    
+    three.crash();
+    three.move();
+    three.update();
+    
+    four.crash();
+    four.move();
+    four.update();
+    
+    five.crash();
+    five.move();
+    five.update();
+    myGameArea.start();
+}
+
+function getMousePos(canvas, evt) {
+    var rect = myGameArea.canvas.getBoundingClientRect();
+    return {
+    h: evt.clientX - rect.left,
+    v: evt.clientY - rect.top
+    };
+}
+
+myGameArea.canvas.addEventListener('click', function(evt) {
+var mousePos = getMousePos(myGameArea.canvas, evt);
+one.checkAnswer(mousePos);
+two.checkAnswer(mousePos);
+three.checkAnswer(mousePos);
+four.checkAnswer(mousePos);
+five.checkAnswer(mousePos);
+})
+
+
+function getRandomTask() {
+var k;
+var sections = document.getElementsByClassName("engword");
+var premier;
+
+for (k = 0; k < sections.length; k++) {tasks.push(k)};
+tasks.sort(function(a, b){return 0.5 - Math.random()});
+taskNumber = 0;
+premier = tasks[taskNumber];
+text = document.getElementsByClassName("engword")[premier].innerHTML;
+document.getElementById("task").innerHTML = document.getElementsByClassName("rusword")[premier].innerHTML;
+myGameArea.start();
+}
+
+function showNext() {
+var sections = document.getElementsByClassName("engword");
+document.getElementById("answer").innerHTML = "";
+taskNumber += 1;
+if (taskNumber < sections.length)
+{ind = tasks[taskNumber];
+text = document.getElementsByClassName("engword")[ind].innerHTML;
+document.getElementById("task").innerHTML = document.getElementsByClassName("rusword")[ind].innerHTML;
+myGameArea.start()}
+else {tasks = []; getRandomTask();}
+}
+
+</script>
+
+</body>
+</html>
